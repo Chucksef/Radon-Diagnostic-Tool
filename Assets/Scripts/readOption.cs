@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +8,9 @@ public class readOption : MonoBehaviour {
     /// <summary>
     /// Public Variables go here!!!
     /// </summary>
+    [Range(.1f, 2f)]
+    public float animTime;
+
     [Header("Panels")]
     public GameObject pnl_BuildInfo;
     public GameObject pnl_RiserInfo;
@@ -95,46 +98,48 @@ public class readOption : MonoBehaviour {
         inputs[9] = in_45s;
         inputs[10] = in_RainCaps;
 
-        goodCB = in_Elbows.colors;
+        //These lines store new colorblock data into goodCB and badCB
+        goodCB = in_Elbows.colors; //both based on existing colorblock...
         badCB = in_Elbows.colors;
         badCB.normalColor = new Color(1, 0.2980392f, 0.2980392f);
         badCB.fadeDuration = 0f;
         badCB.highlightedColor = new Color(1, 0.2980392f, 0.2980392f);
         badCB.disabledColor = new Color(1, 0.2980392f, 0.2980392f);
 
-        //The following block gets the pipe details panel's text boxes, then does shit with them...
-        //Transform tempBox = pnl_ResultsInfo.GetComponent<Transform>();
-        //var tempTexts = tempBox.GetComponentsInChildren<Text>();
-
-        //for (int i = 0; i < tempTexts.Length; i++)
-        //{
-        //    tempTexts[i].text = i.ToString();
-        //}
-
     }
 
-
-    // Function to get the Outer Diameter and Wall Thickness based on the dropdown selection, 
-    // which form the basis for the rest of the data, but can't be calculated themselves
-    //
-    // This function is called when the Calculate button is pressed, and when the dropdown menu selection changes.
-
+    IEnumerator FlyInRightAnimation(Transform tf){
+        
+    }
     public void FlyInRight(GameObject flyMe) {
+        //set start time
+        //get animTime
+        Camera cam = GetComponent<Camera>();
+        Vector3 startPos = cam.ViewportToWorldPoint(new Vector3(1, .5, camera.nearClipPlane));
+        
+
+        var tf = flyMe.GetComponent<Transform>();
+        Vector2 dims = new Vector2(flyMe.width, flyMe.height);
+        Vector2 ss = new Vector2()
+
+        //center flyMe vertically
+        //set
+
         Animator anim = flyMe.GetComponent<Animator>();
         anim.Play("Fly In Right");
     }
 
-    IEnumerator NormalColor(InputField obj)
+    IEnumerator NormalColor(InputField tempInput)
     {
         Debug.Log("Coroutine starting at "+Time.time);
         tempCB = badCB;
-        obj.colors = tempCB;
+        tempInput.colors = tempCB;
         tempCB = goodCB;
         tempCB.fadeDuration = 1.5f;
-        obj.colors = tempCB;
+        tempInput.colors = tempCB;
         yield return new WaitForSeconds(1.5f);
         Debug.Log("Coroutine finished at " + Time.time);
-        obj.colors = goodCB;
+        tempInput.colors = goodCB;
         //for (int i = 0; i < 1; i++)
         //{
 
@@ -142,12 +147,12 @@ public class readOption : MonoBehaviour {
         //    if(i == 0)
         //    {
         //        Debug.Log("Color = red");
-        //        obj.colors = badCB;
+        //        tempInput.colors = badCB;
         //    }
         //    else if(i == 1)
         //    {
         //        Debug.Log("Color = white");
-        //        obj.colors = goodCB;
+        //        tempInput.colors = goodCB;
         //    }
         //yield return new WaitForSeconds(1);
         //}
