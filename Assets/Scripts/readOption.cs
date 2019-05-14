@@ -8,8 +8,12 @@ public class readOption : MonoBehaviour {
     /// <summary>
     /// Public Variables go here!!!
     /// </summary>
-    [Range(.1f, 2f)]
-    public float animTime;
+    
+    [Range(.1f, 1.25f)]
+    public float animTime = .25f;
+    [Range(.1f, 2.5f)]
+    public float warnTime = 1.25f;
+    public Color warnColor = new Color(1, 0.2980392f, 0.2980392f);
 
     [Header("Panels")]
     public GameObject pnl_BuildInfo;
@@ -46,13 +50,9 @@ public class readOption : MonoBehaviour {
     public InputField[] out_CFMPerSystem;
     public InputField[] out_FanDPNeeded;
 
-
-
     /// <summary>
     /// Private Variables Go Here!!!
     /// </summary>
-    int dropValue;                                                                  //variable to store the dropdown menu selection as an array index
-
     float i_AirFlowFactor;                                                          //variable for Air Flow
     float i_TreatmentArea;                                                          //variable for Treatment Area
     float o_AirFlow;                                                                //calculated variable for AirFlow
@@ -79,13 +79,13 @@ public class readOption : MonoBehaviour {
 
     InputField[] inputs = new InputField[11];
 
-    ColorBlock badCB = new ColorBlock();
-    ColorBlock tempCB = new ColorBlock();
+    ColorBlock warnCB = new ColorBlock();
     ColorBlock goodCB = new ColorBlock();
-
 
     // Use this for initialization
     void Start() {
+        Screen.fullScreen = false;
+
         inputs[0] = in_AirFlowFactor;
         inputs[1] = in_TreatmentArea;
         inputs[2] = out_AirFlow;
@@ -98,64 +98,64 @@ public class readOption : MonoBehaviour {
         inputs[9] = in_45s;
         inputs[10] = in_RainCaps;
 
-        //These lines store new colorblock data into goodCB and badCB
+        //These lines store new colorblock data into goodCB and warnCB
         goodCB = in_Elbows.colors; //both based on existing colorblock...
-        badCB = in_Elbows.colors;
-        badCB.normalColor = new Color(1, 0.2980392f, 0.2980392f);
-        badCB.fadeDuration = 0f;
-        badCB.highlightedColor = new Color(1, 0.2980392f, 0.2980392f);
-        badCB.disabledColor = new Color(1, 0.2980392f, 0.2980392f);
+        warnCB = in_Elbows.colors;
+        warnCB.normalColor = warnColor;
+        warnCB.fadeDuration = 0f;
+        warnCB.highlightedColor = warnColor;
+        warnCB.disabledColor = warnColor;
 
     }
 
-    IEnumerator FlyInRightAnimation(Transform tf){
-        
-    }
-    public void FlyInRight(GameObject flyMe) {
-        //set start time
-        //get animTime
-        Camera cam = GetComponent<Camera>();
-        Vector3 startPos = cam.ViewportToWorldPoint(new Vector3(1, .5, camera.nearClipPlane));
-        
-
-        var tf = flyMe.GetComponent<Transform>();
-        Vector2 dims = new Vector2(flyMe.width, flyMe.height);
-        Vector2 ss = new Vector2()
-
-        //center flyMe vertically
-        //set
-
+    public void FlyInRight(GameObject flyMe)
+    {
         Animator anim = flyMe.GetComponent<Animator>();
         anim.Play("Fly In Right");
     }
 
-    IEnumerator NormalColor(InputField tempInput)
+        ///<summary>
+        ///This is where I will house the new math-based animations to replace the animator, animator controller, and animations on the panels.
+        ///</summary>
+
+    //IEnumerator FlyInRightAnimation(Transform tf){
+    //    yield return null;
+    //}
+
+    //public void MathFlyInRight(GameObject flyMe)
+    //{
+
+    //    set start time
+    //    get animTime
+    //    Camera cam = GetComponent<Camera>();
+    //    Vector3 startPos = cam.ViewportToWorldPoint(new Vector3(1, .5f, cam.nearClipPlane));
+
+
+    //    var tf = flyMe.GetComponent<Transform>();
+    //    var canScale = tf.parent.GetComponentInParent<CanvasScaler>();
+    //    Vector2 dims = new Vector2(tf, flyMe.height);
+    //    Vector2 ss = new Vector2()
+
+    //    center flyMe vertically
+    //    set
+
+    //    Animator anim = flyMe.GetComponent<Animator>();
+    //    anim.Play("Fly In Right");
+    //}
+
+    IEnumerator FlashWarningColor(InputField tempInput)
     {
-        Debug.Log("Coroutine starting at "+Time.time);
-        tempCB = badCB;
+        var lastCalcTime = Time.time;
+        tempInput.colors = warnCB; //sets tempInput's colorblock to be equivalent to the warnCB
+        var tempCB = goodCB;
+        //Debug.Log(tempCB);
+        tempCB.fadeDuration = warnTime;
         tempInput.colors = tempCB;
-        tempCB = goodCB;
-        tempCB.fadeDuration = 1.5f;
-        tempInput.colors = tempCB;
-        yield return new WaitForSeconds(1.5f);
-        Debug.Log("Coroutine finished at " + Time.time);
-        tempInput.colors = goodCB;
-        //for (int i = 0; i < 1; i++)
-        //{
-
-
-        //    if(i == 0)
-        //    {
-        //        Debug.Log("Color = red");
-        //        tempInput.colors = badCB;
-        //    }
-        //    else if(i == 1)
-        //    {
-        //        Debug.Log("Color = white");
-        //        tempInput.colors = goodCB;
-        //    }
-        //yield return new WaitForSeconds(1);
-        //}
+        yield return new WaitForSeconds(warnTime);
+        if(lastCalcTime+warnTime >= Time.time)
+        {
+            tempInput.colors = goodCB;
+        }
     }
 
     public void FlyOutRight(GameObject pnl1)
@@ -214,20 +214,19 @@ public class readOption : MonoBehaviour {
         }
     }
 
+    //This function runs when the Calculate button is pushed.
     public void runData(GameObject panel)
     {
-        bool formFilledOut = true;
+        bool formFilledOut = true; //saves variable to check if form is filled out...
 
-        foreach (var x in inputs)
+        foreach (var x in inputs) //check all inputs fields in the inputs[] array...
         {
-            if (x.text == "")
+            if (x.text == "") // if this input field has no text, that input field is bad, we can't proceed
             {
                 formFilledOut = false;
-                Debug.Log("Starting Coroutine");
-                StartCoroutine(NormalColor(x));
+                StartCoroutine(FlashWarningColor(x));
             }
         }
-
 
         if(formFilledOut)
         {
@@ -277,18 +276,14 @@ public class readOption : MonoBehaviour {
             out_CFMPerSystem[i].text = (Mathf.Round(o_CFMPerSystem[i]*1000f)/1000f).ToString();
             out_FanDPNeeded[i].text = (Mathf.Round(o_FanDPNeeded[i]*1000f)/1000f).ToString();
 
-            //Check if Riser Air Velocity is too large...
-            var oldColors = out_RiserAirVelocity[i].colors;
-            var goodColors = oldColors;
-
             //...If so, set that field's color to red
             if (o_RiserAirVelocity[i] > o_MaxAirFlowLimit)
             {
-                out_SystemsNeeded[i].colors = badCB;
-                out_OuterDiameter[i].colors = badCB;
-                out_RiserAirVelocity[i].colors = badCB;
-                out_CFMPerSystem[i].colors = badCB;
-                out_FanDPNeeded[i].colors = badCB;
+                out_SystemsNeeded[i].colors = warnCB;
+                out_OuterDiameter[i].colors = warnCB;
+                out_RiserAirVelocity[i].colors = warnCB;
+                out_CFMPerSystem[i].colors = warnCB;
+                out_FanDPNeeded[i].colors = warnCB;
             }
             else
             {
