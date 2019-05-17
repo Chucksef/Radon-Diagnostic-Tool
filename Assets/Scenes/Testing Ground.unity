@@ -385,6 +385,8 @@ MonoBehaviour:
   field: {fileID: 1449158508}
   Flash: {fileID: 1120998778}
   ttf: {fileID: 732154841}
+  redish: {r: 0.7264151, g: 0, b: 0, a: 0.5019608}
+  greenish: {r: 0, g: 0.7169812, b: 0, a: 0.5019608}
 --- !u!1 &1062475429
 GameObject:
   m_ObjectHideFlags: 0
