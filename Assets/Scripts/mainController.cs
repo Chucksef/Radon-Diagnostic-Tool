@@ -3,25 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class readOption : MonoBehaviour {
+public class mainController : MonoBehaviour {
 
-    /// <summary>
-    /// Public Variables go here!!!
-    /// </summary>
-    
+    //ALL PUBLIC VARIABLES HERE
     [Range(.1f, 1.25f)]
     public float animTime = .25f;
     [Range(.1f, 2.5f)]
     public float warnTime = 1.25f;
-    public Color warnColor = new Color(1, 0.2980392f, 0.2980392f);
+
+    [Header("Canvas")]
+    public Canvas cv;
 
     [Header("Panels")]
     public GameObject pnl_BuildInfo;
     public GameObject pnl_RiserInfo;
-    public GameObject pnl_PipeInfo;
-    public GameObject pnl_ResultsInfo;
     public GameObject pnl_Results;
     public GameObject pnl_Blur;
+    public GameObject pnl_Main;
 
     [Header("Building Info Fields")]
     public InputField in_AirFlowFactor;
@@ -38,8 +36,6 @@ public class readOption : MonoBehaviour {
     public InputField in_45s;
     public InputField in_RainCaps;
 
-    //[Header("Pipe Size Dropdown")]
-    //public Dropdown in_PipeDropdown;
     [Header("Pipe Sizes")]
     public int[] pipeSizes;
 
@@ -50,9 +46,11 @@ public class readOption : MonoBehaviour {
     public InputField[] out_CFMPerSystem;
     public InputField[] out_FanDPNeeded;
 
-    /// <summary>
-    /// Private Variables Go Here!!!
-    /// </summary>
+    [Header("Animation Curves")]
+    public AnimationCurve easeAccel = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
+    public AnimationCurve easeDecel = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
+
+    //ALL PRIVATE VARIABLES HERE
     float i_AirFlowFactor;                                                          //variable for Air Flow
     float i_TreatmentArea;                                                          //variable for Treatment Area
     float o_AirFlow;                                                                //calculated variable for AirFlow
@@ -77,26 +75,28 @@ public class readOption : MonoBehaviour {
     float[] o_TEL = new float[5];                                                   //calculated variable for Total Equivalent Length
     float[] o_FanDPNeeded = new float[5];                                           //calculated variable for Minimum Differential Pressure
 
-    InputField[] inputs = new InputField[11];
+    InputField[] Inputs = new InputField[11];
 
+    Color warnColor = new Color(1, 0.2980392f, 0.2980392f);
     ColorBlock warnCB = new ColorBlock();
     ColorBlock goodCB = new ColorBlock();
 
-    // Use this for initialization
+    //runs at start
     void Start() {
         Screen.fullScreen = false;
 
-        inputs[0] = in_AirFlowFactor;
-        inputs[1] = in_TreatmentArea;
-        inputs[2] = out_AirFlow;
-        inputs[3] = in_MaxAirVelocityTarget;
-        inputs[4] = in_MaxAirLeeway;
-        inputs[5] = out_MaxAirFlowLimit;
-        inputs[6] = in_MinVacuum;
-        inputs[7] = in_PipeLength;
-        inputs[8] = in_Elbows;
-        inputs[9] = in_45s;
-        inputs[10] = in_RainCaps;
+        //Place the linked inputs into one array of all inputs
+        Inputs[0] = in_AirFlowFactor;
+        Inputs[1] = in_TreatmentArea;
+        Inputs[2] = out_AirFlow;
+        Inputs[3] = in_MaxAirVelocityTarget;
+        Inputs[4] = in_MaxAirLeeway;
+        Inputs[5] = out_MaxAirFlowLimit;
+        Inputs[6] = in_MinVacuum;
+        Inputs[7] = in_PipeLength;
+        Inputs[8] = in_Elbows;
+        Inputs[9] = in_45s;
+        Inputs[10] = in_RainCaps;
 
         //These lines store new colorblock data into goodCB and warnCB
         goodCB = in_Elbows.colors; //both based on existing colorblock...
@@ -106,74 +106,131 @@ public class readOption : MonoBehaviour {
         warnCB.highlightedColor = warnColor;
         warnCB.disabledColor = warnColor;
 
+        //The following code places the Results panel at the outside edge of the frame, centered vertically
+        //RectTransform objects to store the transforms of the 2 panels
+        var rt_results = pnl_Results.GetComponent<RectTransform>();
+        var rt_main = pnl_Main.GetComponent<RectTransform>();
+
+        //Rect objects to store the width/height of the 2 panels
+        var rect_results = RectTransformUtility.PixelAdjustRect(rt_results, cv);
+        var rect_main = RectTransformUtility.PixelAdjustRect(rt_main, cv);
+
+        //Some math to figure out the rightPos (offscreen)
+        var rightPos = rect_main.width + (rect_results.width - rect_main.width) / 2;
+        rt_results.localPosition = new Vector3(rightPos, 0, 0);
+
     }
 
-    public void FlyInRight(GameObject flyMe)
+    ///<summary>
+    ///Animates RectTransform from its current Position to specified coordinates (endPos)
+    ///</summary>
+    IEnumerator FlyIn(RectTransform rt, Vector2 endPos){
+        Vector2 startPos = rt.localPosition;
+
+        for (float i = 0f; i < animTime; i = i+Time.deltaTime)
+        {
+            var timePCT = i / animTime;
+            Vector2 currentPos = new Vector2(Mathf.Lerp(startPos.x,endPos.x, easeDecel.Evaluate(timePCT)), Mathf.Lerp(startPos.y, endPos.y, easeDecel.Evaluate(timePCT)));
+            rt.localPosition = new Vector2(currentPos.x ,currentPos.y);
+            yield return null;
+        }
+        rt.localPosition = endPos;
+    }
+
+    ///<summary>
+    ///Animates RectTransform from its current position to out of screen in whichever direction specified.
+    ///</summary>
+    IEnumerator FlyOut(RectTransform rt, string dir)
     {
-        Animator anim = flyMe.GetComponent<Animator>();
-        anim.Play("Fly In Right");
+        //RectTransform objects to store the transforms of the main panel
+        var rt_main = pnl_Main.GetComponent<RectTransform>();
+
+        var rect_this = RectTransformUtility.PixelAdjustRect(rt, cv);                           //Rect object to store rt's height and width
+        var rect_main = RectTransformUtility.PixelAdjustRect(rt_main, cv);                      //Rect object to store main panel's height and width
+
+        Vector2 startPos = rt.localPosition;                                                    //Start Position is defined as where the panel starts
+        Vector2 endPos;                                                                         //declares variable to set later
+
+        dir = dir.ToLower();            
+
+        //Some math to figure out the rightPos (offscreen)
+        switch (dir)
+        {
+            case "up":
+            case "top":
+                endPos.x = 0f;
+                endPos.y = rect_main.height + (rect_this.height - rect_main.height) / 2;
+                break;
+
+            case "right":
+                endPos.x = rect_main.width + (rect_this.width - rect_main.width) / 2;
+                endPos.y = 0f;
+                break;
+
+            case "down":
+            case "bottom":
+                endPos.x = 0f;
+                endPos.y = -(rect_main.height + (rect_this.height - rect_main.height) / 2);
+                break;
+
+            case "left":
+                endPos.x = -(rect_main.height + (rect_this.height - rect_main.height) / 2);
+                endPos.y = 0f;
+                break;
+
+            default:
+                endPos.x = 5000f;
+                endPos.y = 5000f;
+                Debug.Log("FlyOut(): No Valid Direction Declared");
+                break;
+        }
+
+        for (float i = 0f; i < animTime; i = i + Time.deltaTime)
+        {
+            var timePCT = i / animTime;
+            Vector2 currentPos = new Vector2(Mathf.Lerp(startPos.x, endPos.x, easeAccel.Evaluate(timePCT)), Mathf.Lerp(startPos.y, endPos.y, easeAccel.Evaluate(timePCT)));
+            rt.localPosition = new Vector2(currentPos.x, currentPos.y);
+            yield return null;
+        }
+
+        rt.localPosition = endPos;
     }
 
-        ///<summary>
-        ///This is where I will house the new math-based animations to replace the animator, animator controller, and animations on the panels.
-        ///</summary>
 
-    //IEnumerator FlyInRightAnimation(Transform tf){
-    //    yield return null;
-    //}
-
-    //public void MathFlyInRight(GameObject flyMe)
-    //{
-
-    //    set start time
-    //    get animTime
-    //    Camera cam = GetComponent<Camera>();
-    //    Vector3 startPos = cam.ViewportToWorldPoint(new Vector3(1, .5f, cam.nearClipPlane));
-
-
-    //    var tf = flyMe.GetComponent<Transform>();
-    //    var canScale = tf.parent.GetComponentInParent<CanvasScaler>();
-    //    Vector2 dims = new Vector2(tf, flyMe.height);
-    //    Vector2 ss = new Vector2()
-
-    //    center flyMe vertically
-    //    set
-
-    //    Animator anim = flyMe.GetComponent<Animator>();
-    //    anim.Play("Fly In Right");
-    //}
-
-    IEnumerator FlashWarningColor(InputField tempInput)
+    IEnumerator FlashWarningColor(InputField thisInput)
     {
         var lastCalcTime = Time.time;
-        tempInput.colors = warnCB; //sets tempInput's colorblock to be equivalent to the warnCB
+        thisInput.colors = warnCB; //sets thisInput's colorblock to be equivalent to the warnCB
         var tempCB = goodCB;
-        //Debug.Log(tempCB);
         tempCB.fadeDuration = warnTime;
-        tempInput.colors = tempCB;
+        thisInput.colors = tempCB;
         yield return new WaitForSeconds(warnTime);
         if(lastCalcTime+warnTime >= Time.time)
         {
-            tempInput.colors = goodCB;
+            thisInput.colors = goodCB;
         }
     }
 
-    public void FlyOutRight(GameObject pnl1)
+    //returns to the main menu
+    public void MainMenu(GameObject thisPnl)
     {
+        var rt_pnl = thisPnl.GetComponent<RectTransform>();
         pnl_Blur.SetActive(false);
-        pnl1.GetComponent<Animator>().Play("Fly Out Right");
+        StartCoroutine(FlyOut(rt_pnl, "right"));
     }
 
+    //runs when the Reset button is pushed
     public void ResetFields()
     {
         //Resets all Main fields to default values "";
-        foreach (var input in inputs)
+        foreach (var input in Inputs)
         {
             input.text = "";
             input.colors = goodCB;
         }
     }
 
+    //runs when the Default button is pushed
     public void DefaultValues()
     {
         //Resets all Main fields to default values "";
@@ -192,6 +249,7 @@ public class readOption : MonoBehaviour {
 
     }
 
+    //runs when the values in 1st and 2nd input boxes change
     public void UpdateAirFlow()
     {
         if (float.Parse(in_AirFlowFactor.text) > 0 && float.Parse(in_TreatmentArea.text) > 0)
@@ -203,6 +261,7 @@ public class readOption : MonoBehaviour {
         }
     }
 
+    //runs when the values in the 4th and 5th input boxes change
     public void UpdateLimit()
     {
         if (float.Parse(in_MaxAirVelocityTarget.text) > 0 && float.Parse(in_MaxAirLeeway.text) > 0)
@@ -214,12 +273,11 @@ public class readOption : MonoBehaviour {
         }
     }
 
-    //This function runs when the Calculate button is pushed.
-    public void runData(GameObject panel)
+    //runs when the Calculate button is pushed
+    public void runData(GameObject thisPnl)
     {
         bool formFilledOut = true; //saves variable to check if form is filled out...
-
-        foreach (var x in inputs) //check all inputs fields in the inputs[] array...
+        foreach (var x in Inputs) //check all Inputs fields in the Inputs[] array...
         {
             if (x.text == "") // if this input field has no text, that input field is bad, we can't proceed
             {
@@ -230,16 +288,16 @@ public class readOption : MonoBehaviour {
 
         if(formFilledOut)
         {
+            var rt_pnl = thisPnl.GetComponent<RectTransform>();
             SetBuildingInfo();
             UpdateMatrix();
             pnl_Blur.SetActive(true);
-            panel.SetActive(true);
-            FlyInRight(panel);
+            thisPnl.SetActive(true);
+            StartCoroutine(FlyIn(rt_pnl, new Vector2(0,0)));
         }
-
     }
 
-    // Feeds input text into variables
+    //feeds input text into variables
     public void SetBuildingInfo()
     {
         i_AirFlowFactor = float.Parse(in_AirFlowFactor.text);
@@ -254,13 +312,14 @@ public class readOption : MonoBehaviour {
 
     }
 
+    //updates the results matrix based on the inputs from the main interface
     public void UpdateMatrix()
     {
-        //Loop over the length of the SystemsNeeded Array, doing calculations and filling in each box in the column as we go...
+        //Loop over the length of the SystemsNeeded Array of input boxes (for outputs), doing calculations and filling in each box in the column as we go...
         for (int i = 0; i < out_SystemsNeeded.Length; i++)
         {
-
-            o_OuterDiameter[i] = float.Parse(out_OuterDiameter[i].text); //First get the value of the outer diameters for each Pipe Size
+            //Do the actual calculations for each variable....
+            o_OuterDiameter[i] = float.Parse(out_OuterDiameter[i].text); //Get Outer Diameter into a variable
             o_InsideDiameter[i] = o_OuterDiameter[i] - (2 * o_WallThick[i]);
             o_PipeSqFt[i] = (Mathf.PI * Mathf.Pow(o_InsideDiameter[i] / 2, 2)) / 144;
             o_SystemsNeeded[i] = Mathf.Max(1f, (Mathf.Round(o_AirFlow / o_PipeSqFt[i] / i_MaxAirVelocityTarget)));
