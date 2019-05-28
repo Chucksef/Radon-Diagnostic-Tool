@@ -1,0 +1,283 @@
+{
+	"allFanModels": [
+		{
+			"Model": "FR100",
+			"Manufacturer": "Fantech",
+			"WattsMin":13,
+			"WattsMax":19,
+			"MaxPressure":0.87,
+			"DuctSize":4.5,
+			"Equation":null
+		},
+		{
+			"Model": "RP140",
+			"Manufacturer": "RadonAway",
+			"WattsMin":14,
+			"WattsMax":20,
+			"MaxPressure":0.80,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "HP2133",
+			"Manufacturer": "Fantech",
+			"WattsMin":14,
+			"WattsMax":20,
+			"MaxPressure":0.84,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "XP201",
+			"Manufacturer": "RadonAway",
+			"WattsMin":45,
+			"WattsMax":66,
+			"MaxPressure":1.90,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "HP2190",
+			"Manufacturer": "Fantech",
+			"WattsMin":60,
+			"WattsMax":85,
+			"MaxPressure":1.93,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "XP151",
+			"Manufacturer": "RadonAway",
+			"WattsMin":45,
+			"WattsMax":60,
+			"MaxPressure":1.60,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "HP190",
+			"Manufacturer": "Fantech",
+			"WattsMin":60,
+			"WattsMax":85,
+			"MaxPressure":2.01,
+			"DuctSize":4.5,
+			"Equation":null
+		},
+		{
+			"Model": "HP190SL",
+			"Manufacturer": "Fantech",
+			"WattsMin":60,
+			"WattsMax":85,
+			"MaxPressure":2.01,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "RP145",
+			"Manufacturer": "RadonAway",
+			"WattsMin":37,
+			"WattsMax":71,
+			"MaxPressure":2.10,
+			"DuctSize":4,
+			"Equation":null
+		},
+		{
+			"Model": "FR150",
+			"Manufacturer": "Fantech",
+			"WattsMin":54,
+			"WattsMax":72,
+			"MaxPressure":1.58,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "XR261",
+			"Manufacturer": "RadonAway",
+			"WattsMin":65,
+			"WattsMax":105,
+			"MaxPressure":1.80,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "RP260",
+			"Manufacturer": "RadonAway",
+			"WattsMin":52,
+			"WattsMax":72,
+			"MaxPressure":1.80,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "FR160",
+			"Manufacturer": "Fantech",
+			"WattsMin":102,
+			"WattsMax":130,
+			"MaxPressure":2.32,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "RP265",
+			"Manufacturer": "RadonAway",
+			"WattsMin":86,
+			"WattsMax":140,
+			"MaxPressure":2.50,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "HP220",
+			"Manufacturer": "Fantech",
+			"WattsMin":85,
+			"WattsMax":152,
+			"MaxPressure":2.46,
+			"DuctSize":6,
+			"Equation":null
+		},
+		{
+			"Model": "RP380",
+			"Manufacturer": "RadonAway",
+			"WattsMin":103,
+			"WattsMax":156,
+			"MaxPressure":2.30,
+			"DuctSize":8,
+			"Equation":null
+		},
+		{
+			"Model": "FR220",
+			"Manufacturer": "Fantech",
+			"WattsMin":106,
+			"WattsMax":128,
+			"MaxPressure":2.14,
+			"DuctSize":8,
+			"Equation":null
+		},
+		{
+			"Model": "FR225",
+			"Manufacturer": "Fantech",
+			"WattsMin":111,
+			"WattsMax":152,
+			"MaxPressure":2.48,
+			"DuctSize":8,
+			"Equation":null
+		},
+		{
+			"Model": "FR250",
+			"Manufacturer": "Fantech",
+			"WattsMin":146,
+			"WattsMax":248,
+			"MaxPressure":2.58,
+			"DuctSize":10,
+			"Equation":null
+		},
+		{
+			"Model": "GP201",
+			"Manufacturer": "RadonAway",
+			"WattsMin":40,
+			"WattsMax":60,
+			"MaxPressure":2.00,
+			"DuctSize":3,
+			"Equation":null
+		},
+		{
+			"Model": "GP301",
+			"Manufacturer": "RadonAway",
+			"WattsMin":55,
+			"WattsMax":90,
+			"MaxPressure":2.60,
+			"DuctSize":3,
+			"Equation":null
+		},
+		{
+			"Model": "GP401",
+			"Manufacturer": "RadonAway",
+			"WattsMin":60,
+			"WattsMax":110,
+			"MaxPressure":3.40,
+			"DuctSize":3,
+			"Equation":null
+		},
+		{
+			"Model": "GP501",
+			"Manufacturer": "RadonAway",
+			"WattsMin":70,
+			"WattsMax":140,
+			"MaxPressure":4.20,
+			"DuctSize":3,
+			"Equation":null
+		},
+		{
+			"Model": "FG 6",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":72,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 6XL",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":153,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 8",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":119,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 8XL",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":142,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 10",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":138,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 10XL",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":196,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 12",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":181,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		},
+		{
+			"Model": "FG 12XL",
+			"Manufacturer": "Fantech",
+			"WattsMin":null,
+			"WattsMax":301,
+			"MaxPressure":null,
+			"DuctSize":null,
+			"Equation":null
+		}
+	]
+}

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 public class mainController : MonoBehaviour {
 
@@ -20,6 +21,7 @@ public class mainController : MonoBehaviour {
     public GameObject pnl_Results;
     public GameObject pnl_Blur;
     public GameObject pnl_Main;
+    public GameObject pnl_FanOptions;
 
     [Header("Building Info Fields")]
     public InputField in_AirFlowFactor;
@@ -36,6 +38,11 @@ public class mainController : MonoBehaviour {
     public InputField in_45s;
     public InputField in_RainCaps;
 
+    [Header("Fan Options Fields")]
+    public Text fanPipeSize;
+    public Text fanAirFlow;
+    public Text fanMinDP;
+
     [Header("Pipe Sizes")]
     public int[] pipeSizes;
 
@@ -45,6 +52,7 @@ public class mainController : MonoBehaviour {
     public InputField[] out_RiserAirVelocity;
     public InputField[] out_CFMPerSystem;
     public InputField[] out_FanDPNeeded;
+    public Toggle[] in_SizeToggles;
 
     [Header("Animation Curves")]
     public AnimationCurve easeAccel = AnimationCurve.Linear(0.0f, 0.0f, 1.0f, 1.0f);
@@ -77,9 +85,23 @@ public class mainController : MonoBehaviour {
 
     InputField[] Inputs = new InputField[11];
 
+    int selectedCol = 0;
+    float selectedPipeSize;
+    float selectedAirFlow;
+    float selectedMinDP;
+
     Color warnColor = new Color(1, 0.2980392f, 0.2980392f);
+    Color selectedColor = new Color(1f, 1f, 1f);
     ColorBlock warnCB = new ColorBlock();
     ColorBlock goodCB = new ColorBlock();
+    ColorBlock selectedCB = new ColorBlock();
+
+
+
+
+
+
+
 
     //runs at start
     void Start() {
@@ -100,33 +122,42 @@ public class mainController : MonoBehaviour {
 
         //These lines store new colorblock data into goodCB and warnCB
         goodCB = in_Elbows.colors; //both based on existing colorblock...
+
+        selectedCB = in_Elbows.colors;
+        selectedCB.normalColor = selectedColor;
+        selectedCB.fadeDuration = 0f;
+        selectedCB.highlightedColor = selectedColor;
+        selectedCB.disabledColor = selectedColor;
+
         warnCB = in_Elbows.colors;
         warnCB.normalColor = warnColor;
         warnCB.fadeDuration = 0f;
         warnCB.highlightedColor = warnColor;
         warnCB.disabledColor = warnColor;
 
-        //The following code places the Results panel at the outside edge of the frame, centered vertically
-        //RectTransform objects to store the transforms of the 2 panels
-        var rt_results = pnl_Results.GetComponent<RectTransform>();
-        var rt_main = pnl_Main.GetComponent<RectTransform>();
+        StartCoroutine(DelayedPositionOnLaunch());
+    }
 
-        //Rect objects to store the width/height of the 2 panels
-        var rect_results = RectTransformUtility.PixelAdjustRect(rt_results, cv);
-        var rect_main = RectTransformUtility.PixelAdjustRect(rt_main, cv);
 
-        //Some math to figure out the rightPos (offscreen)
-        var rightPos = rect_main.width + (rect_results.width - rect_main.width) / 2;
-        rt_results.localPosition = new Vector3(rightPos, 0, 0);
 
+
+
+    IEnumerator DelayedPositionOnLaunch()
+    {
+        yield return new WaitForSeconds(.2f);
+        StartPosition(pnl_Results);
+        StartPosition(pnl_FanOptions);
     }
 
     ///<summary>
     ///Animates RectTransform from its current Position to specified coordinates (endPos)
     ///</summary>
-    IEnumerator FlyIn(RectTransform rt, Vector2 endPos){
+    IEnumerator FlyIn(RectTransform rt, Vector2 endPos, float delay){
         Vector2 startPos = rt.localPosition;
-
+        if(delay > 0)
+        {
+            yield return new WaitForSeconds(delay);                                     //delays based on float
+        }
         for (float i = 0f; i < animTime; i = i+Time.deltaTime)
         {
             var timePCT = i / animTime;
@@ -158,22 +189,26 @@ public class mainController : MonoBehaviour {
         {
             case "up":
             case "top":
+            case "north":
                 endPos.x = 0f;
                 endPos.y = rect_main.height + (rect_this.height - rect_main.height) / 2;
                 break;
 
             case "right":
+            case "east":
                 endPos.x = rect_main.width + (rect_this.width - rect_main.width) / 2;
                 endPos.y = 0f;
                 break;
 
             case "down":
             case "bottom":
+            case "south":
                 endPos.x = 0f;
                 endPos.y = -(rect_main.height + (rect_this.height - rect_main.height) / 2);
                 break;
 
             case "left":
+            case "west":
                 endPos.x = -(rect_main.height + (rect_this.height - rect_main.height) / 2);
                 endPos.y = 0f;
                 break;
@@ -197,18 +232,35 @@ public class mainController : MonoBehaviour {
     }
 
 
-    IEnumerator FlashWarningColor(InputField thisInput)
+    IEnumerator FlashWarningColor(GameObject thisInput)
     {
+        var sel = thisInput.GetComponent<Selectable>();
         var lastCalcTime = Time.time;
-        thisInput.colors = warnCB; //sets thisInput's colorblock to be equivalent to the warnCB
+        sel.colors = warnCB; //sets sel's colorblock to be equivalent to the warnCB
         var tempCB = goodCB;
         tempCB.fadeDuration = warnTime;
-        thisInput.colors = tempCB;
+        sel.colors = tempCB;
         yield return new WaitForSeconds(warnTime);
         if(lastCalcTime+warnTime >= Time.time)
         {
-            thisInput.colors = goodCB;
+            sel.colors = goodCB;
         }
+    }
+
+    private void StartPosition(GameObject sss)
+    {
+        //The following code places the passed game-object panel at the right-outside edge of the frame, centered vertically.
+        //RectTransform objects to store the transforms of the 2 panels
+        var rt_sss = sss.GetComponent<RectTransform>();
+        var rt_main = pnl_Main.GetComponent<RectTransform>();
+
+        //Rect objects to store the width/height of the 2 panels
+        var rect_results = RectTransformUtility.PixelAdjustRect(rt_sss, cv);
+        var rect_main = RectTransformUtility.PixelAdjustRect(rt_main, cv);
+
+        //Some math to figure out the rightPos (offscreen)
+        var rightPos = rect_main.width + (rect_results.width - rect_main.width) / 2;
+        rt_sss.localPosition = new Vector3(rightPos, 0, 0);
     }
 
     //returns to the main menu
@@ -276,13 +328,20 @@ public class mainController : MonoBehaviour {
     //runs when the Calculate button is pushed
     public void runData(GameObject thisPnl)
     {
+        //reset Results in_SizeToggles[i] Toggles
+        in_SizeToggles[0].isOn = true;
+
+        selectedPipeSize = -1;
+        selectedCol = -1;
+
         bool formFilledOut = true; //saves variable to check if form is filled out...
         foreach (var x in Inputs) //check all Inputs fields in the Inputs[] array...
         {
             if (x.text == "") // if this input field has no text, that input field is bad, we can't proceed
             {
+                var y = x.gameObject;
                 formFilledOut = false;
-                StartCoroutine(FlashWarningColor(x));
+                StartCoroutine(FlashWarningColor(y));
             }
         }
 
@@ -293,7 +352,7 @@ public class mainController : MonoBehaviour {
             UpdateMatrix();
             pnl_Blur.SetActive(true);
             thisPnl.SetActive(true);
-            StartCoroutine(FlyIn(rt_pnl, new Vector2(0,0)));
+            StartCoroutine(FlyIn(rt_pnl, new Vector2(0,0), 0f));
         }
     }
 
@@ -313,7 +372,7 @@ public class mainController : MonoBehaviour {
     }
 
     //updates the results matrix based on the inputs from the main interface
-    public void UpdateMatrix()
+    private void UpdateMatrix()
     {
         //Loop over the length of the SystemsNeeded Array of input boxes (for outputs), doing calculations and filling in each box in the column as we go...
         for (int i = 0; i < out_SystemsNeeded.Length; i++)
@@ -324,6 +383,15 @@ public class mainController : MonoBehaviour {
             o_PipeSqFt[i] = (Mathf.PI * Mathf.Pow(o_InsideDiameter[i] / 2, 2)) / 144;
             o_SystemsNeeded[i] = Mathf.Max(1f, (Mathf.Round(o_AirFlow / o_PipeSqFt[i] / i_MaxAirVelocityTarget)));
             o_RiserAirVelocity[i] = o_AirFlow / (o_PipeSqFt[i] * o_SystemsNeeded[i]);
+
+            //Check if the Riser Velocity is over the max limit...
+            while (o_RiserAirVelocity[i] > o_MaxAirFlowLimit)
+            {
+                //while it is, increment the system count by 1 and recalculate.
+                o_SystemsNeeded[i]++;
+                o_RiserAirVelocity[i] = o_AirFlow / (o_PipeSqFt[i] * o_SystemsNeeded[i]);
+            }
+
             o_CFMPerSystem[i] = o_AirFlow / o_SystemsNeeded[i];
             o_TEL[i] = i_PipeLength + (i_Elbows * 30 * o_InsideDiameter[i] / 12) + (i_45s * 16 * o_InsideDiameter[i] / 12) + (i_RainCaps * 60 * o_InsideDiameter[i] / 12);
             o_FanDPNeeded[i] = i_MinVacuum + (0.109136f * Mathf.Pow(o_CFMPerSystem[i], 1.9f) / Mathf.Pow(o_InsideDiameter[i], 5.02f) * (o_TEL[i]) / 100);
@@ -332,29 +400,74 @@ public class mainController : MonoBehaviour {
             out_OuterDiameter[i].text = o_OuterDiameter[i].ToString();
             out_SystemsNeeded[i].text = o_SystemsNeeded[i].ToString();
             out_RiserAirVelocity[i].text = Mathf.Round(o_RiserAirVelocity[i]).ToString();
-            out_CFMPerSystem[i].text = (Mathf.Round(o_CFMPerSystem[i]*1000f)/1000f).ToString();
-            out_FanDPNeeded[i].text = (Mathf.Round(o_FanDPNeeded[i]*1000f)/1000f).ToString();
+            out_CFMPerSystem[i].text = (Mathf.Round(o_CFMPerSystem[i] * 1000f) / 1000f).ToString();
+            out_FanDPNeeded[i].text = (Mathf.Round(o_FanDPNeeded[i] * 1000f) / 1000f).ToString();
+        }
+    }
 
-            //...If so, set that field's color to red
-            if (o_RiserAirVelocity[i] > o_MaxAirFlowLimit)
-            {
-                out_SystemsNeeded[i].colors = warnCB;
-                out_OuterDiameter[i].colors = warnCB;
-                out_RiserAirVelocity[i].colors = warnCB;
-                out_CFMPerSystem[i].colors = warnCB;
-                out_FanDPNeeded[i].colors = warnCB;
-            }
-            else
-            {
-                out_SystemsNeeded[i].colors = goodCB;
-                out_OuterDiameter[i].colors = goodCB;
-                out_RiserAirVelocity[i].colors = goodCB;
-                out_CFMPerSystem[i].colors = goodCB;
-                out_FanDPNeeded[i].colors = goodCB;
-            }
-
+    //runs when a column toggle is pressed
+    public void SubmitPipeSize(GameObject fanPnl)
+    {
+        bool formFilledOut = false; //Saves variable to check if form is filled out.
+        if (selectedCol >= 0) // if a column is selected...
+        {
+            formFilledOut = true; //...the form IS filled out.
         }
 
+        if (formFilledOut) //if the form is filled out...
+        {
+            var rt_fanPnl = fanPnl.GetComponent<RectTransform>();
+            SetFanSpecs();
+            fanPnl.SetActive(true);
+            StartCoroutine(FlyOut(pnl_Results.GetComponent<RectTransform>(), "right")); //...calls FlyOut() on the panel passed into this function...
+            StartCoroutine(FlyIn(rt_fanPnl, new Vector2(0, 0), .2f)); //...and calls FlyIn() on the fan Panel.
+        }
+        else //do this if the form is NOT filled out
+        {
+            for (int i = 0; i < 5; i++) //for each toggle, run FlashWarningColor().
+            {
+                StartCoroutine(FlashWarningColor(in_SizeToggles[i].gameObject));
+            }
+        }
     }
+
+    private void SetFanSpecs()
+    {
+        fanPipeSize.text = selectedPipeSize.ToString();
+        fanAirFlow.text = (Mathf.Round(selectedAirFlow*10f)/10f).ToString();
+        fanMinDP.text = (Mathf.Round(selectedMinDP*100f)/100f).ToString();
+    }
+
+    public void BackToPipeSelection(GameObject thisPnl)
+    {
+        StartCoroutine(FlyOut(thisPnl.GetComponent<RectTransform>(), "right"));
+        StartCoroutine(FlyIn(pnl_Results.GetComponent<RectTransform>(), new Vector2(0f, 0f), .2f));
+    }
+
+    public void SelectColumn(Toggle tog)
+    {
+        //return all of the previously selected column to normal colors...
+        if (selectedCol > -1)
+        {
+            out_SystemsNeeded[selectedCol].colors = goodCB;
+            out_OuterDiameter[selectedCol].colors = goodCB;
+            out_RiserAirVelocity[selectedCol].colors = goodCB;
+            out_CFMPerSystem[selectedCol].colors = goodCB;
+            out_FanDPNeeded[selectedCol].colors = goodCB;
+        }
+
+        //set the int variable to the selected Toggle's index...
+        selectedCol = System.Array.IndexOf(in_SizeToggles, tog);
+        selectedPipeSize = pipeSizes[selectedCol];
+        selectedAirFlow = o_CFMPerSystem[selectedCol];
+        selectedMinDP = o_FanDPNeeded[selectedCol];
+
+        //set each of the columns corresponding to that index to the selected hilight color.
+        out_SystemsNeeded[selectedCol].colors = selectedCB;
+        out_OuterDiameter[selectedCol].colors = selectedCB;
+        out_RiserAirVelocity[selectedCol].colors = selectedCB;
+        out_CFMPerSystem[selectedCol].colors = selectedCB;
+        out_FanDPNeeded[selectedCol].colors = selectedCB;
+    } 
 
 }
