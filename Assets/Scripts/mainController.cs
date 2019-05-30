@@ -97,12 +97,6 @@ public class mainController : MonoBehaviour {
     ColorBlock selectedCB = new ColorBlock();
 
 
-
-
-
-
-
-
     //runs at start
     void Start() {
         Screen.fullScreen = false;
@@ -137,9 +131,6 @@ public class mainController : MonoBehaviour {
 
         StartCoroutine(DelayedPositionOnLaunch());
     }
-
-
-
 
 
     IEnumerator DelayedPositionOnLaunch()
@@ -331,8 +322,8 @@ public class mainController : MonoBehaviour {
         //reset Results in_SizeToggles[i] Toggles
         in_SizeToggles[0].isOn = true;
 
-        selectedPipeSize = -1;
-        selectedCol = -1;
+        selectedPipeSize = 0;
+        selectedCol = 0;
 
         bool formFilledOut = true; //saves variable to check if form is filled out...
         foreach (var x in Inputs) //check all Inputs fields in the Inputs[] array...
